@@ -1,7 +1,7 @@
 package app.model;
 
-import java.time.LocalDate;
 import app.model.enums.EstadoEvento;
+import java.time.LocalDate;
 import java.util.*;
 
 public abstract class Evento {
@@ -25,9 +25,57 @@ public abstract class Evento {
         responsables.add(persona);
     }
 
+    public void agregarResponsable(Persona persona, String rol) {
+        responsables.add(persona);
+        persona.asignarRol(this, rol);
+    }
+
+    public Set<Persona> getResponsablesConRol(String rol) {
+        Set<Persona> conRol = new HashSet<>();
+        for (Persona p : responsables) {
+            if (p.obtenerRoles(this).contains(rol)) {
+                conRol.add(p);
+            }
+        }
+        return conRol;
+    }
+
+    public boolean tieneRol(Persona persona, String rol) {
+        return responsables.contains(persona) && persona.obtenerRoles(this).contains(rol);
+    }
+
+    /**
+     * Indica si el evento requiere inscripción previa.
+     * Por defecto NO requiere inscripción.
+     * Subclases que sí requieran inscripción deben sobrescribirlo.
+     */
+    public boolean requiereInscripcion() {
+        return false; // Por defecto, no requiere inscripción
+    }
+
+    /**
+     * Valida si el evento tiene cupo disponible para inscribir a otro participante.
+     * Por defecto no hay cupo limitado.
+     * Subclases con cupo máximo deben sobrescribirlo.
+     */
+    public boolean validarCupo() {
+        return true; // Por defecto no hay límite de cupo
+    }
+
+    /**
+     * Inscribe un participante si se cumplen las condiciones de estado,
+     * inscripción previa y cupo.
+     * @throws IllegalStateException si no se puede inscribir.
+     */
     public boolean inscribirParticipante(Participante p) {
         if (estado != EstadoEvento.CONFIRMADO && estado != EstadoEvento.EN_EJECUCION) {
             throw new IllegalStateException("El evento no acepta inscripciones en su estado actual.");
+        }
+        if (!requiereInscripcion()) {
+            throw new IllegalStateException("El evento no requiere inscripción previa.");
+        }
+        if (!validarCupo()) {
+            throw new IllegalStateException("Cupo máximo alcanzado.");
         }
         return participantes.add(p);
     }

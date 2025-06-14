@@ -16,12 +16,16 @@ public class Taller extends Evento {
     }
 
     @Override
-    public boolean inscribirParticipante(Participante p) {
-        if (getParticipantes().size() >= cupoMaximo) {
-            throw new IllegalStateException("Cupo máximo alcanzado para este taller.");
-        }
-        return super.inscribirParticipante(p);
+    public boolean requiereInscripcion() {
+        return true; // Taller requiere inscripción previa
     }
+
+    @Override
+    public boolean validarCupo() {
+        return getParticipantes().size() < cupoMaximo;
+    }
+
+    // No sobreescribimos inscribirParticipante, usa la lógica de Evento
 
     public int getCupoMaximo() { return cupoMaximo; }
     public Persona getInstructor() { return instructor; }

@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public class Exposicion extends Evento {
     private String tipoArte;
-    private Persona curador;
+    private final Persona curador;
 
     public Exposicion(String nombre, LocalDate fechaInicio, int duracionEstimadasDias, String tipoArte, Persona curador) {
         super(nombre, fechaInicio, duracionEstimadasDias);

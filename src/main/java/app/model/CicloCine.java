@@ -1,8 +1,8 @@
 package app.model;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Collections;
 import java.time.LocalDate;
 
 public class CicloCine extends Evento {
@@ -13,6 +13,11 @@ public class CicloCine extends Evento {
         super(nombre, fechaInicio, duracionEstimadasDias);
         this.peliculasOrdenadas = new LinkedHashMap<>();
         this.conCharlasPosteriores = conCharlasPosteriores;
+    }
+
+    @Override
+    public boolean requiereInscripcion() {
+        return true; // Supongamos que el ciclo requiere inscripción
     }
 
     public void agregarPelicula(int orden, Pelicula pelicula) {
