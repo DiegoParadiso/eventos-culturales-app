@@ -1,7 +1,8 @@
 package app.model;
 
-import app.model.enums.Modalidad;
 import java.time.LocalDate;
+
+import app.model.enums.Modalidad;
 
 public class Taller extends Evento {
     private int cupoMaximo;

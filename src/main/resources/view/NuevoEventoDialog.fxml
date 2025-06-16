@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<DialogPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="app.controller.NuevoEventoDialogController">
+    <headerText>
+        Complete los detalles del nuevo evento.
+    </headerText>
+    <content>
+        <VBox spacing="10">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+            
+            <!-- Contenedor principal de los campos comunes usando GridPane para mejor alineación -->
+            <GridPane hgap="10" vgap="10">
+                <columnConstraints>
+                    <ColumnConstraints hgrow="NEVER" maxWidth="Infinity" minWidth="100.0" prefWidth="120.0" />
+                    <ColumnConstraints hgrow="ALWAYS" maxWidth="Infinity" minWidth="10.0" prefWidth="200.0" />
+                </columnConstraints>
+                
+                <!-- Fila 1: Nombre -->
+                <Label text="Nombre:" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                <TextField fx:id="txtNombre" promptText="Nombre del evento" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                
+                <!-- Fila 2: Fecha de inicio -->
+                <Label text="Fecha de inicio:" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                <DatePicker fx:id="dateFechaInicio" promptText="Seleccione fecha" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                
+                <!-- Fila 3: Duración -->
+                <Label text="Duración (días):" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+                <TextField fx:id="txtDuracion" prefWidth="60" promptText="Ej: 3" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                
+                <!-- Fila 4: Tipo de evento -->
+                <Label text="Tipo de evento:" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+                <ComboBox fx:id="comboTipo" promptText="Seleccione un tipo" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            </GridPane>
+
+            <!-- Grupos específicos de evento -->
+            <!-- Feria -->
+            <VBox fx:id="grupoFeria" spacing="5" visible="false" managed="false" styleClass="evento-tipo-group">
+                <Label text="Datos de Feria" style="-fx-font-weight: bold;"/>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Cantidad de Stands:"/>
+                    <TextField fx:id="txtCantidadStands" HBox.hgrow="ALWAYS" promptText="Ej: 50"/>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="¿Al aire libre?"/>
+                    <CheckBox fx:id="chkAlAireLibre"/>
+                </HBox>
+            </VBox>
+
+            <!-- Concierto -->
+            <VBox fx:id="grupoConcierto" spacing="5" visible="false" managed="false" styleClass="evento-tipo-group">
+                <Label text="Datos de Concierto" style="-fx-font-weight: bold;"/>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Tipo de entrada:"/>
+                    <ComboBox fx:id="comboTipoEntrada" HBox.hgrow="ALWAYS" promptText="Seleccione tipo de entrada"/>
+                </HBox>
+            </VBox>
+
+            <!-- Taller -->
+            <VBox fx:id="grupoTaller" spacing="5" visible="false" managed="false" styleClass="evento-tipo-group">
+                <Label text="Datos de Taller" style="-fx-font-weight: bold;"/>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Cupo máximo:"/>
+                    <TextField fx:id="txtCupo" HBox.hgrow="ALWAYS" promptText="Ej: 20"/>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Instructor:"/>
+                    <ComboBox fx:id="comboInstructor" HBox.hgrow="ALWAYS" promptText="Seleccione instructor"/>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Modalidad:"/>
+                    <ComboBox fx:id="comboModalidad" HBox.hgrow="ALWAYS" promptText="Seleccione modalidad"/>
+                </HBox>
+            </VBox>
+
+            <!-- Exposición -->
+            <VBox fx:id="grupoExposicion" spacing="5" visible="false" managed="false" styleClass="evento-tipo-group">
+                <Label text="Datos de Exposición" style="-fx-font-weight: bold;"/>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Tipo de arte:"/>
+                    <TextField fx:id="txtTipoArte" HBox.hgrow="ALWAYS" promptText="Ej: Pintura, Escultura"/>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="Curador:"/>
+                    <ComboBox fx:id="comboCurador" HBox.hgrow="ALWAYS" promptText="Seleccione curador"/>
+                </HBox>
+            </VBox>
+
+            <!-- Ciclo de Cine -->
+            <VBox fx:id="grupoCicloCine" spacing="5" visible="false" managed="false" styleClass="evento-tipo-group">
+                <Label text="Datos de Ciclo de Cine" style="-fx-font-weight: bold;"/>
+                <HBox alignment="CENTER_LEFT" spacing="10">
+                    <Label text="¿Con charlas posteriores?"/>
+                    <CheckBox fx:id="chkCharlasPosteriores"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </content>
+
+    <buttonTypes>
+        <ButtonType text="Guardar" buttonData="OK_DONE"/>
+        <ButtonType text="Cancelar" buttonData="CANCEL_CLOSE"/>
+    </buttonTypes>
+</DialogPane>

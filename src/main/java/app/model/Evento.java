@@ -1,8 +1,12 @@
 package app.model;
 
-import app.model.enums.EstadoEvento;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import app.model.enums.EstadoEvento;
 
 public abstract class Evento {
     private String nombre;

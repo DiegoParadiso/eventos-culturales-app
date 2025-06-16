@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.fxml.FXMLLoader?>
+
+<DialogPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="app.controller.NuevaPersonaDialogController">
+    <headerText>
+        Complete los datos de la nueva persona.
+    </headerText>
+    <content>
+        <VBox spacing="10">
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="Nombre Completo:"/>
+                <TextField fx:id="txtNombre" prefWidth="250" promptText="Ej: Juan Pérez"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="DNI:"/>
+                <TextField fx:id="txtDni" prefWidth="150" promptText="Ej: 12345678A"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="Teléfono:"/>
+                <TextField fx:id="txtTelefono" prefWidth="180" promptText="Ej: +54 9 11 1234 5678"/>
+            </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label text="Correo:"/>
+                <TextField fx:id="txtCorreo" prefWidth="250" promptText="Ej: juan.perez@example.com"/>
+            </HBox>
+        </VBox>
+    </content>
+
+    <buttonTypes>
+        <ButtonType text="Guardar" buttonData="OK_DONE"/>
+        <ButtonType text="Cancelar" buttonData="CANCEL_CLOSE"/>
+    </buttonTypes>
+</DialogPane>
