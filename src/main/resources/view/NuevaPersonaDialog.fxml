@@ -11,7 +11,7 @@
         Complete los datos de la nueva persona.
     </headerText>
     <content>
-        <VBox spacing="10">
+<VBox spacing="10" prefHeight="500" prefWidth="600">
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <Label text="Nombre Completo:"/>
                 <TextField fx:id="txtNombre" prefWidth="250" promptText="Ej: Juan Pérez"/>

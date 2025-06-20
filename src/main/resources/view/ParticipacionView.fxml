@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<DialogPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="app.controller.ParticipacionController">
+    
+    <headerText>Asignar personas a eventos</headerText>
+
+    <content>
+        <VBox spacing="15" padding="20">
+            
+            <HBox spacing="10">
+                <Label text="Persona:"/>
+                <ComboBox fx:id="comboPersona" prefWidth="200"/>
+                
+                <Label text="Rol:"/>
+                <ComboBox fx:id="comboRol" prefWidth="180"/>
+            </HBox>
+
+            <HBox spacing="10">
+                <Label text="Evento:"/>
+                <ComboBox fx:id="comboEvento" prefWidth="400"/>
+            </HBox>
+
+            <HBox spacing="10" alignment="CENTER">
+                <Button text="Agregar Participación" onAction="#agregarParticipacion"/>
+                <Button text="Eliminar Seleccionada" onAction="#eliminarParticipacion"/>
+            </HBox>
+
+            <TableView fx:id="tablaParticipaciones" prefHeight="250">
+                <columns>
+                    <TableColumn fx:id="colPersona" text="Persona" prefWidth="200"/>
+                    <TableColumn fx:id="colRol" text="Rol" prefWidth="150"/>
+                    <TableColumn fx:id="colEvento" text="Evento" prefWidth="300"/>
+                </columns>
+            </TableView>
+        </VBox>
+    </content>
+
+    <buttonTypes>
+        <ButtonType text="Cerrar" buttonData="CANCEL_CLOSE"/>
+    </buttonTypes>
+
+</DialogPane>

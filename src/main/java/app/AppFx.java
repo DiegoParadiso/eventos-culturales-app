@@ -10,13 +10,22 @@ public class AppFX extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/view/MainView.fxml"));
-        primaryStage.setTitle("Gestión Eventos Culturales");
-        primaryStage.setScene(new Scene(root, 400, 400));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/MainView.fxml"));
+        Parent root = loader.load();
+        Scene scene = new Scene(root);
+
+        primaryStage.setTitle("Gestor de Eventos");
+        primaryStage.setScene(scene);
+        
+        // ✅ Pantalla completa
+        primaryStage.setMaximized(true); // Recomendado
+        // primaryStage.setFullScreen(true); // Alternativa si querés ocultar hasta la barra del sistema
+
         primaryStage.show();
     }
 
     public static void main(String[] args) {
+        
         launch(args);
     }
 }

@@ -47,7 +47,7 @@
                                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
                                  </columnResizePolicy>
                               </TableView>
-                              <HBox spacing="10" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+                              <HBox spacing="10" alignment="CENTER" AnchorPane.bottomAnchor="10.0">
                                  <children>
                                     <Button fx:id="btnNuevoEvento" text="Nuevo Evento" prefWidth="200" onAction="#nuevoEvento"/>
                                     <Button fx:id="btnVerDetallesEvento" text="Ver Detalles" prefWidth="200" onAction="#verDetallesEvento"/>
@@ -75,7 +75,7 @@
                                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
                                  </columnResizePolicy>
                               </TableView>
-                              <HBox spacing="10" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+                              <HBox spacing="10" alignment="CENTER" AnchorPane.bottomAnchor="10.0">
                                  <children>
                                     <Button fx:id="btnNuevaPersona" text="Nueva Persona" prefWidth="300" onAction="#nuevaPersona"/>
                                     <Button fx:id="btnEliminarPersona" text="Eliminar Persona" prefWidth="300" onAction="#eliminarPersona"/>
@@ -101,7 +101,7 @@
                                     <TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
                                  </columnResizePolicy>
                               </TableView>
-                              <HBox spacing="10" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+                              <HBox spacing="10" alignment="CENTER" AnchorPane.bottomAnchor="10.0">
                                  <children>
                                     <Button fx:id="btnRegistrarParticipante" text="Registrar Participante" prefWidth="400" onAction="#registrarParticipante"/>
                                     <Button fx:id="btnEliminarParticipante" text="Eliminar Participante" prefWidth="200" onAction="#eliminarParticipante"/>

@@ -1,5 +1,6 @@
 package app.controller;
 
+import java.io.IOException;
 import java.time.LocalDate;
 
 import app.model.CicloCine; // Asegúrate de importar CicloCine
@@ -281,10 +282,26 @@ public class MainViewController {
 
     @FXML
     public void registrarParticipante() {
-        // Ejemplo: agrega un participante rápido, puedes cambiar por un formulario
-        Participante participante = new Participante("Nuevo Participante", "11112222", "999-888-777", "participante@email.com");
-        participantes.add(participante);
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ParticipacionView.fxml"));
+            DialogPane dialogPane = loader.load();
+
+            Dialog<ButtonType> dialog = new Dialog<>();
+            dialog.setDialogPane(dialogPane);
+            dialog.setTitle("Registrar Participante");
+            
+            ParticipacionController controller = loader.getController();
+            controller.cargarDatosIniciales(personas, eventos);  // PASÁS LAS LISTAS AQUÍ
+            
+            dialog.showAndWait();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Error al abrir el diálogo de registro de participación");
+            alert.showAndWait();
+        }
     }
+
 
     @FXML
     public void eliminarParticipante() {
