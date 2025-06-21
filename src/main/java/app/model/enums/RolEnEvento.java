@@ -4,5 +4,6 @@ public enum RolEnEvento {
     ORGANIZADOR,
     ARTISTA,
     CURADOR,
-    INSTRUCTOR
+    INSTRUCTOR,
+    SIN_ROL
 }

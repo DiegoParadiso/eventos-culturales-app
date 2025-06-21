@@ -41,6 +41,7 @@
                                     <TableColumn fx:id="fechaCol" text="Fecha Inicio" prefWidth="120" />
                                     <TableColumn fx:id="duracionCol" text="Duración" prefWidth="80" />
                                     <TableColumn fx:id="tipoCol" text="Tipo" prefWidth="100" />
+                                    <TableColumn fx:id="cupoCol" text="Cupo Disponible" prefWidth="120" />
                                     <TableColumn fx:id="estadoCol" text="Estado" prefWidth="100" />
                                  </columns>
                                  <columnResizePolicy>

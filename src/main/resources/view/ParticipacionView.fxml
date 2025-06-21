@@ -7,37 +7,50 @@
 <DialogPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="app.controller.ParticipacionController">
-    
-    <headerText>Asignar personas a eventos</headerText>
+
+    <headerText>Asignar Participantes a Eventos</headerText>
 
     <content>
-        <VBox spacing="15" padding="20">
-            
-            <HBox spacing="10">
+        <VBox spacing="15" prefHeight="500" prefWidth="600">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
+            <!-- Selección de Evento -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label text="Evento:"/>
+                <ComboBox fx:id="comboEvento" prefWidth="450"/>
+            </HBox>
+
+            <!-- Opciones para Persona y Rol (solo se muestran si NO es concierto) -->
+            <HBox spacing="10" alignment="CENTER_LEFT" fx:id="hboxPersonaRol">
                 <Label text="Persona:"/>
-                <ComboBox fx:id="comboPersona" prefWidth="200"/>
-                
+                <ComboBox fx:id="comboPersona" prefWidth="220"/>
                 <Label text="Rol:"/>
                 <ComboBox fx:id="comboRol" prefWidth="180"/>
             </HBox>
 
-            <HBox spacing="10">
-                <Label text="Evento:"/>
-                <ComboBox fx:id="comboEvento" prefWidth="400"/>
+            <!-- Opción para Artista (solo se muestra si es concierto) -->
+            <HBox spacing="10" alignment="CENTER_LEFT" fx:id="hboxArtista" visible="false" managed="false">
+                <Label text="Artista/Banda:"/>
+                <ComboBox fx:id="comboArtista" prefWidth="400"/>
             </HBox>
 
-            <HBox spacing="10" alignment="CENTER">
-                <Button text="Agregar Participación" onAction="#agregarParticipacion"/>
-                <Button text="Eliminar Seleccionada" onAction="#eliminarParticipacion"/>
+            <!-- Botones agregar / eliminar -->
+            <HBox spacing="15" alignment="CENTER">
+                <Button text="Agregar Participación" onAction="#agregarParticipacion" />
+                <Button text="Eliminar Seleccionada" onAction="#eliminarParticipacion" />
             </HBox>
 
+            <!-- Tabla de Participaciones -->
             <TableView fx:id="tablaParticipaciones" prefHeight="250">
                 <columns>
-                    <TableColumn fx:id="colPersona" text="Persona" prefWidth="200"/>
-                    <TableColumn fx:id="colRol" text="Rol" prefWidth="150"/>
-                    <TableColumn fx:id="colEvento" text="Evento" prefWidth="300"/>
+                    <TableColumn fx:id="colPersona" text="Persona" prefWidth="180" />
+                    <TableColumn fx:id="colRol" text="Rol" prefWidth="150" />
+                    <TableColumn fx:id="colEvento" text="Evento" prefWidth="250" />
                 </columns>
             </TableView>
+
         </VBox>
     </content>
 

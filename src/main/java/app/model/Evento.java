@@ -3,10 +3,11 @@ package app.model;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Set;
 
 import app.model.enums.EstadoEvento;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public abstract class Evento {
     private String nombre;
@@ -14,14 +15,14 @@ public abstract class Evento {
     private int duracionEstimadasDias;
     private Set<Persona> responsables;
     private EstadoEvento estado;
-    private Set<Participante> participantes;
+    private ObservableList<Participante> participantes;
 
     public Evento(String nombre, LocalDate fechaInicio, int duracionEstimadasDias) {
         this.nombre = nombre;
         this.fechaInicio = fechaInicio;
         this.duracionEstimadasDias = duracionEstimadasDias;
         this.responsables = new HashSet<>();
-        this.participantes = new LinkedHashSet<>();
+        this.participantes = FXCollections.observableArrayList();
         this.estado = EstadoEvento.PLANIFICACION;
     }
 
@@ -81,7 +82,10 @@ public abstract class Evento {
         if (!validarCupo()) {
             throw new IllegalStateException("Cupo máximo alcanzado.");
         }
-        return participantes.add(p);
+        if (!participantes.contains(p)) {
+            return participantes.add(p);
+        }
+        return false;
     }
 
     public void cambiarEstado(EstadoEvento nuevoEstado) {
@@ -94,8 +98,9 @@ public abstract class Evento {
     public int getDuracionEstimadasDias() { return duracionEstimadasDias; }
     public EstadoEvento getEstado() { return estado; }
     public Set<Persona> getResponsables() { return Collections.unmodifiableSet(responsables); }
-    public Set<Participante> getParticipantes() { return Collections.unmodifiableSet(participantes); }
-
+    public ObservableList<Participante> getParticipantes() {
+        return participantes;
+    }
     @Override
     public String toString() {
         return nombre + " (" + fechaInicio + ", " + estado + ")";

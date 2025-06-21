@@ -3,7 +3,7 @@ package app.controller;
 import java.io.IOException;
 import java.time.LocalDate;
 
-import app.model.CicloCine; // Asegúrate de importar CicloCine
+import app.model.CicloCine;
 import app.model.Concierto;
 import app.model.Evento;
 import app.model.Exposicion;
@@ -14,6 +14,7 @@ import app.model.Taller;
 import app.model.enums.EstadoEvento;
 import app.model.enums.Modalidad;
 import app.model.enums.TipoEntrada;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -27,6 +28,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
@@ -39,6 +41,7 @@ public class MainViewController {
     @FXML private TableColumn<Evento, Integer> duracionCol;
     @FXML private TableColumn<Evento, String> tipoCol;
     @FXML private TableColumn<Evento, String> estadoCol;
+    @FXML private TableColumn<Evento, Number> cupoCol;
 
     // --- Personas ---
     @FXML private TableView<Persona> tablaPersonas;
@@ -74,9 +77,10 @@ public class MainViewController {
     private final ObservableList<Persona> personas = FXCollections.observableArrayList();
     private final ObservableList<Participante> participantes = FXCollections.observableArrayList();
 
+
     @FXML
     public void initialize() {
-        // --- Configurar columnas ---
+        // Configurar columnas eventos
         nombreCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNombre()));
         fechaCol.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getFechaInicio()));
         duracionCol.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getDuracionEstimadasDias()));
@@ -84,30 +88,58 @@ public class MainViewController {
         estadoCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getEstado().toString()));
         tablaEventos.setItems(eventos);
 
+        // Columna cupo con lógica específica para Taller, Feria o sin límite
+        cupoCol.setCellValueFactory(data -> {
+            Evento evento = data.getValue();
+            if (evento instanceof Taller taller) {
+                return taller.cupoDisponibleProperty();
+            } else if (evento instanceof Feria feria) {
+                int cupo = feria.getCantidadStands() - feria.getParticipantes().size();
+                return new SimpleIntegerProperty(cupo);
+            } else {
+                return new SimpleIntegerProperty(-1); // Sin límite
+            }
+        });
+        cupoCol.setCellFactory(col -> new TableCell<>() {
+            @Override
+            protected void updateItem(Number item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else if (item.intValue() == -1) {
+                    setText("Sin límite");
+                } else {
+                    setText(item.intValue() + " lugares");
+                }
+            }
+        });
+
+        // Configurar columnas personas
         nombrePersonaCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNombreCompleto()));
         dniCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getDni()));
         telefonoCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getTelefono()));
         correoCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCorreo()));
         tablaPersonas.setItems(personas);
 
+        // Configurar columnas participantes
         nombreParticipanteCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNombreCompleto()));
         contactoParticipanteCol.setCellValueFactory(data -> new SimpleStringProperty(
                 data.getValue().getCorreo() + " / " + data.getValue().getTelefono()));
-        // Asegúrate de que la clase Participante tenga el método toString() adecuado para mostrar el nombre
-        // o ajusta la factoría para mostrar el nombre del evento asociado correctamente.
-        eventoAsociadoCol.setCellValueFactory(data -> new SimpleStringProperty(buscarEventoDeParticipante(data.getValue())));
+                eventoAsociadoCol.setCellValueFactory(data -> new SimpleStringProperty(buscarEventosDeParticipante(data.getValue())));
         tablaParticipantes.setItems(participantes);
 
+        // Configurar columnas tabla eventos por día
         eventoDiaCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNombre()));
-        horarioDiaCol.setCellValueFactory(data -> new SimpleStringProperty("")); // Puedes completar si tienes horario
-        lugarDiaCol.setCellValueFactory(data -> new SimpleStringProperty(""));   // Puedes completar si tienes lugar
+        horarioDiaCol.setCellValueFactory(data -> new SimpleStringProperty(""));  // Puedes agregar lógica si tienes horarios
+        lugarDiaCol.setCellValueFactory(data -> new SimpleStringProperty(""));    // Puedes agregar lógica si tienes lugar
 
+        // Listener para filtrar eventos por fecha seleccionada
         selectorFecha.valueProperty().addListener((obs, old, nuevaFecha) -> filtrarEventosPorFecha(nuevaFecha));
 
-        // --- Cargar datos de ejemplo ---
+        // Cargar datos de prueba
         cargarDatosEjemplo();
     }
-    
+
     private void mostrarAlerta(String mensaje) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Campos incompletos");
@@ -117,23 +149,22 @@ public class MainViewController {
     }
 
     private void cargarDatosEjemplo() {
-        // Personas
-        Persona p1 = new Persona("Ana López", "12345678", "111-222-333", "ana@email.com");
-        Persona p2 = new Persona("Juan Pérez", "87654321", "222-333-444", "juan@email.com");
-        Persona p3 = new Persona("María Gómez", "11223344", "333-444-555", "maria@email.com");
+        // Crear personas ejemplo
+        Persona p1 = new Persona("Claudio Biale", "01234567", "3758-123-456", "cb@email.com");
+        Persona p2 = new Persona("Melissa Kolb", "76543210", "3758-123-456", "mk@email.com");
+        Persona p3 = new Persona("John Doe", "11223344", "3758-123-456", "jd@email.com");
         personas.addAll(p1, p2, p3);
 
-        // Participantes (pueden ser personas, pero para la tabla usamos Participante)
-        Participante part1 = new Participante("Carlos Ruiz", "99887766", "444-555-666", "carlos@email.com");
-        Participante part2 = new Participante("Lucía Torres", "88776655", "555-666-777", "lucia@email.com");
+        // Participantes ejemplo
+        Participante part1 = new Participante("Carlos Ruiz", "01010101", "3758-123-456", "cr@email.com");
+        Participante part2 = new Participante("Lucía Torres", "10101010", "3758-123-456", "lt@email.com");
         participantes.addAll(part1, part2);
 
-        // Eventos
+        // Crear eventos ejemplo
         Evento feria = new Feria("Feria del Libro", LocalDate.now().plusDays(2), 3, 20, true);
         Evento taller = new Taller("Taller de Pintura", LocalDate.now().plusDays(5), 2, 15, p1, Modalidad.PRESENCIAL);
         Evento concierto = new Concierto("Concierto Rock", LocalDate.now().plusDays(10), 1, TipoEntrada.PAGA);
         Evento expo = new Exposicion("Expo Arte", LocalDate.now().plusDays(7), 4, "Pintura", p2);
-        // Añadimos un CicloCine de ejemplo
         Evento cicloCine = new CicloCine("Ciclo de Cine Clásico", LocalDate.now().plusDays(15), 5, true);
 
         // Asignar responsables y roles
@@ -141,25 +172,24 @@ public class MainViewController {
         taller.agregarResponsable(p2, "Instructor");
         concierto.agregarResponsable(p3, "Productor");
         expo.agregarResponsable(p2, "Curador");
-        cicloCine.agregarResponsable(p1, "Coordinador"); // Añadido responsable para cicloCine
+        cicloCine.agregarResponsable(p1, "Coordinador");
 
-        // Cambiar estado para permitir inscripciones
+        // Cambiar estados para permitir inscripciones
         feria.cambiarEstado(EstadoEvento.CONFIRMADO);
         taller.cambiarEstado(EstadoEvento.CONFIRMADO);
-        cicloCine.cambiarEstado(EstadoEvento.CONFIRMADO); // Añadido estado para cicloCine
+        cicloCine.cambiarEstado(EstadoEvento.CONFIRMADO);
 
-        // Inscribir participantes en eventos que lo permiten
+        // Inscribir participantes si se requiere
         if (feria.requiereInscripcion()) {
             try { feria.inscribirParticipante(part1); } catch (Exception ignored) {}
         }
         if (taller.requiereInscripcion()) {
             try { taller.inscribirParticipante(part2); } catch (Exception ignored) {}
         }
-        if (cicloCine.requiereInscripcion()) { // Inscribir en cicloCine si requiere
-            try { cicloCine.inscribirParticipante(new Participante("Nuevo Cinefilo", "10101010", "123-456-789", "cinefilo@example.com")); } catch (Exception ignored) {}
+        if (cicloCine.requiereInscripcion()) {
         }
 
-        eventos.addAll(feria, taller, concierto, expo, cicloCine); // Añadir cicloCine a la lista
+        eventos.addAll(feria, taller, concierto, expo, cicloCine);
     }
 
     private void filtrarEventosPorFecha(LocalDate fecha) {
@@ -176,16 +206,22 @@ public class MainViewController {
         tablaEventosDia.setItems(filtrados);
     }
 
-    private String buscarEventoDeParticipante(Participante p) {
+    private String buscarEventosDeParticipante(Participante p) {
+        StringBuilder eventosAsociados = new StringBuilder();
         for (Evento e : eventos) {
-            if (e.getParticipantes().contains(p)) {
-                return e.getNombre();
+            for (Participante registrado : e.getParticipantes()) {
+                if (registrado.getDni().equals(p.getDni())) {
+                    if (!eventosAsociados.isEmpty()) {
+                        eventosAsociados.append(", ");
+                    }
+                    eventosAsociados.append(e.getNombre());
+                }
             }
         }
-        return "";
+        return eventosAsociados.toString();
     }
 
-    // --- Acciones de menú y botones ---
+    // --- Acciones botones y menús ---
 
     @FXML
     public void salir() {
@@ -202,12 +238,9 @@ public class MainViewController {
             Dialog<ButtonType> dialog = new Dialog<>();
             dialog.setTitle("Nuevo Evento");
             dialog.setDialogPane(dialogPane);
-            dialog.setResizable(true); // ¡ESTA ES LA LÍNEA QUE NECESITAS AÑADIR/VERIFICAR!
-
-            // Opcional: fijar el owner del diálogo para que el diálogo se centre en la ventana principal
+            dialog.setResizable(true);
             dialog.initOwner(btnNuevoEvento.getScene().getWindow());
 
-            // Mostrar el diálogo y esperar respuesta
             dialog.showAndWait().ifPresent(response -> {
                 if (response.getButtonData() == ButtonBar.ButtonData.OK_DONE) {
                     Evento nuevoEvento = controller.getEvento();
@@ -254,7 +287,8 @@ public class MainViewController {
             Dialog<ButtonType> dialog = new Dialog<>();
             dialog.setTitle("Nueva Persona");
             dialog.setDialogPane(dialogPane);
-            dialog.setResizable(true); // También aquí, es una buena práctica
+            dialog.setResizable(true);
+            dialog.initOwner(btnNuevaPersona.getScene().getWindow());
 
             dialog.showAndWait().ifPresent(response -> {
                 if (response.getButtonData().isDefaultButton()) {
@@ -272,6 +306,17 @@ public class MainViewController {
         }
     }
 
+    private void actualizarListaParticipantesDesdeEventos() {
+        participantes.clear();
+        for (Evento e : eventos) {
+            for (Participante p : e.getParticipantes()) {
+                if (!participantes.contains(p)) {
+                    participantes.add(p);
+                }
+            }
+        }
+    }
+
     @FXML
     public void eliminarPersona() {
         Persona seleccionada = tablaPersonas.getSelectionModel().getSelectedItem();
@@ -279,36 +324,55 @@ public class MainViewController {
             personas.remove(seleccionada);
         }
     }
-
     @FXML
     public void registrarParticipante() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ParticipacionView.fxml"));
             DialogPane dialogPane = loader.load();
 
+            ParticipacionController controller = loader.getController();
+            controller.cargarDatosIniciales(personas, eventos);
+            controller.setParticipantesGlobales(participantes);
+
+            controller.setOnParticipacionAgregada(() -> {
+                actualizarListaParticipantesDesdeEventos();
+                tablaParticipantes.refresh();
+                tablaEventos.refresh();
+            });
+controller.setPersonas(personas);
+
             Dialog<ButtonType> dialog = new Dialog<>();
             dialog.setDialogPane(dialogPane);
             dialog.setTitle("Registrar Participante");
-            
-            ParticipacionController controller = loader.getController();
-            controller.cargarDatosIniciales(personas, eventos);  // PASÁS LAS LISTAS AQUÍ
-            
-            dialog.showAndWait();
+            dialog.initOwner(btnRegistrarParticipante.getScene().getWindow());
+
+            dialog.showAndWait().ifPresent(response -> {
+                if (response.getButtonData().isDefaultButton()) {
+                    // Aquí también actualizar la lista y refrescar
+                    actualizarListaParticipantesDesdeEventos();
+                    tablaParticipantes.setItems(participantes);
+                    tablaParticipantes.refresh();
+                    tablaEventos.refresh();
+                }
+            });
 
         } catch (IOException e) {
             e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Error al abrir el diálogo de registro de participación");
-            alert.showAndWait();
+            mostrarAlerta("Error al abrir el diálogo de registro de participación: " + e.getMessage());
         }
     }
 
-
-    @FXML
-    public void eliminarParticipante() {
-        Participante seleccionado = tablaParticipantes.getSelectionModel().getSelectedItem();
-        if (seleccionado != null) {
-            participantes.remove(seleccionado);
+@FXML
+public void eliminarParticipante() {
+    Participante seleccionado = tablaParticipantes.getSelectionModel().getSelectedItem();
+    if (seleccionado != null) {
+        // Remover participante de los eventos a los que está inscripto
+        for (Evento e : eventos) {
+            e.getParticipantes().remove(seleccionado);
         }
+        actualizarListaParticipantesDesdeEventos();
+        tablaParticipantes.refresh();
+        tablaEventos.refresh();
     }
-    
+}
 }

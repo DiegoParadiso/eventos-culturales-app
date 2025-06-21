@@ -19,4 +19,14 @@ public class Feria extends Evento {
     public String toString() {
         return super.toString() + " - Feria con " + cantidadStands + " stands, " + (alAireLibre ? "al aire libre" : "techada");
     }
+    @Override
+public boolean requiereInscripcion() {
+    return true; // o una variable si querés que sea configurable
+}
+
+@Override
+public boolean validarCupo() {
+    return getParticipantes().size() < cantidadStands;
+}
+
 }
