@@ -11,7 +11,6 @@
           <Menu text="Archivo">
             <items>
               <MenuItem onAction="#salir" text="Salir" />
-              <MenuItem text="Modo Oscuro" />
             </items>
           </Menu>
           <Menu text="Acciones Rápidas">
@@ -35,7 +34,7 @@
                      <content>
                         <AnchorPane>
                            <children>
-                              <TableView fx:id="tablaEventos" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="54.0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+                              <TableView fx:id="tablaEventos" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="54.0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
                                  <columns>
                                     <TableColumn fx:id="nombreCol" text="Nombre" prefWidth="180" />
                                     <TableColumn fx:id="fechaCol" text="Fecha Inicio" prefWidth="120" />
@@ -65,7 +64,7 @@
                      <content>
                         <AnchorPane>
                            <children>
-                              <TableView fx:id="tablaPersonas" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="54.0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+                              <TableView fx:id="tablaPersonas" editable="true" AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="54.0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
                                  <columns>
                                     <TableColumn fx:id="nombrePersonaCol" text="Nombre Completo" prefWidth="200" />
                                     <TableColumn fx:id="dniCol" text="DNI" prefWidth="100" />

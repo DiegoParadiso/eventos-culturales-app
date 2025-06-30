@@ -8,10 +8,10 @@ import java.util.Objects;
 import java.util.Set;
 
 public class Persona {
-    private final String nombreCompleto;
-    private final String dni;
-    private final String telefono;
-    private final String correo;
+    private String nombreCompleto;
+    private String dni;
+    private String telefono;
+    private String correo;
 
     private final Map<Evento, Set<String>> rolesPorEvento = new HashMap<>();
 
@@ -30,6 +30,7 @@ public class Persona {
         return rolesPorEvento.getOrDefault(evento, Collections.emptySet());
     }
 
+    // Getters
     public String getNombreCompleto() {
         return nombreCompleto;
     }
@@ -44,6 +45,23 @@ public class Persona {
 
     public String getCorreo() {
         return correo;
+    }
+
+    // Setters para edición
+    public void setNombreCompleto(String nombreCompleto) {
+        this.nombreCompleto = nombreCompleto;
+    }
+
+    public void setDni(String dni) {
+        this.dni = dni;
+    }
+
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+
+    public void setCorreo(String correo) {
+        this.correo = correo;
     }
 
     @Override

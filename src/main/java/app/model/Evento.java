@@ -16,6 +16,7 @@ public abstract class Evento {
     private Set<Persona> responsables;
     private EstadoEvento estado;
     private ObservableList<Participante> participantes;
+    
 
     public Evento(String nombre, LocalDate fechaInicio, int duracionEstimadasDias) {
         this.nombre = nombre;
@@ -110,6 +111,9 @@ public abstract class Evento {
     public ObservableList<Participante> getParticipantes() {
         return participantes;
     }
+public void setNombre(String nombre) { this.nombre = nombre; }
+public void setFechaInicio(LocalDate fechaInicio) { this.fechaInicio = fechaInicio; }
+public void setDuracionEstimadasDias(int dias) { this.duracionEstimadasDias = dias; }
 
     @Override
     public String toString() {

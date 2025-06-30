@@ -23,14 +23,15 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.TextFieldTableCell;
 
 public class MainViewController {
 
@@ -77,10 +78,9 @@ public class MainViewController {
     private final ObservableList<Persona> personas = FXCollections.observableArrayList();
     private final ObservableList<Participante> participantes = FXCollections.observableArrayList();
 
-
     @FXML
     public void initialize() {
-        // Configurar columnas eventos
+        // --- Eventos ---
         nombreCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNombre()));
         fechaCol.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getFechaInicio()));
         duracionCol.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getDuracionEstimadasDias()));
@@ -88,7 +88,6 @@ public class MainViewController {
         estadoCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getEstado().toString()));
         tablaEventos.setItems(eventos);
 
-        // Columna cupo con lógica específica para Taller, Feria o sin límite
         cupoCol.setCellValueFactory(data -> {
             Evento evento = data.getValue();
             if (evento instanceof Taller taller) {
@@ -97,7 +96,7 @@ public class MainViewController {
                 int cupo = feria.getCantidadStands() - feria.getParticipantes().size();
                 return new SimpleIntegerProperty(cupo);
             } else {
-                return new SimpleIntegerProperty(-1); // Sin límite
+                return new SimpleIntegerProperty(-1);
             }
         });
         cupoCol.setCellFactory(col -> new TableCell<>() {
@@ -114,30 +113,122 @@ public class MainViewController {
             }
         });
 
-        // Configurar columnas personas
+        // --- Personas (editable) ---
+        tablaPersonas.setItems(personas);
+        tablaPersonas.setEditable(true);
+
         nombrePersonaCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNombreCompleto()));
         dniCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getDni()));
         telefonoCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getTelefono()));
         correoCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getCorreo()));
-        tablaPersonas.setItems(personas);
 
-        // Configurar columnas participantes
-        nombreParticipanteCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNombreCompleto()));
-        contactoParticipanteCol.setCellValueFactory(data -> new SimpleStringProperty(
-                data.getValue().getCorreo() + " / " + data.getValue().getTelefono()));
-                eventoAsociadoCol.setCellValueFactory(data -> new SimpleStringProperty(buscarEventosDeParticipante(data.getValue())));
+        nombrePersonaCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        dniCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        telefonoCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        correoCol.setCellFactory(TextFieldTableCell.forTableColumn());
+
+        nombrePersonaCol.setOnEditCommit(event -> {
+            Persona p = event.getRowValue();
+            p.setNombreCompleto(event.getNewValue());
+        });
+        dniCol.setOnEditCommit(event -> {
+            Persona p = event.getRowValue();
+            p.setDni(event.getNewValue());
+        });
+        telefonoCol.setOnEditCommit(event -> {
+            Persona p = event.getRowValue();
+            p.setTelefono(event.getNewValue());
+        });
+        correoCol.setOnEditCommit(event -> {
+            Persona p = event.getRowValue();
+            p.setCorreo(event.getNewValue());
+        });
+
+        // --- Participantes ---
         tablaParticipantes.setItems(participantes);
+        nombreParticipanteCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNombreCompleto()));
+        contactoParticipanteCol.setCellValueFactory(data ->
+                new SimpleStringProperty(data.getValue().getCorreo() + " / " + data.getValue().getTelefono()));
+        eventoAsociadoCol.setCellValueFactory(data ->
+                new SimpleStringProperty(buscarEventosDeParticipante(data.getValue())));
 
-        // Configurar columnas tabla eventos por día
+        // --- Calendario ---
         eventoDiaCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNombre()));
-        horarioDiaCol.setCellValueFactory(data -> new SimpleStringProperty(""));  // Puedes agregar lógica si tienes horarios
-        lugarDiaCol.setCellValueFactory(data -> new SimpleStringProperty(""));    // Puedes agregar lógica si tienes lugar
+        horarioDiaCol.setCellValueFactory(data -> new SimpleStringProperty(""));
+        lugarDiaCol.setCellValueFactory(data -> new SimpleStringProperty(""));
 
-        // Listener para filtrar eventos por fecha seleccionada
         selectorFecha.valueProperty().addListener((obs, old, nuevaFecha) -> filtrarEventosPorFecha(nuevaFecha));
 
-        // Cargar datos de prueba
+        // --- Cargar datos iniciales ---
         cargarDatosEjemplo();
+        
+        // --- Tabla Eventos editable ---
+        tablaEventos.setEditable(true);
+
+        // Nombre editable
+        nombreCol.setCellFactory(TextFieldTableCell.forTableColumn());
+        nombreCol.setOnEditCommit(event -> {
+            Evento ev = event.getRowValue();
+            ev.setNombre(event.getNewValue());
+        });
+
+        // Fecha editable
+        fechaCol.setCellFactory(column -> new TableCell<>() {
+            private final DatePicker datePicker = new DatePicker();
+
+            {
+                datePicker.setOnAction(e -> {
+                    Evento evento = getTableView().getItems().get(getIndex());
+                    evento.setFechaInicio(datePicker.getValue());
+                    commitEdit(datePicker.getValue());
+                });
+            }
+
+            @Override
+            protected void updateItem(LocalDate item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    datePicker.setValue(item);
+                    setGraphic(datePicker);
+                }
+            }
+        });
+
+        // Duración editable
+        duracionCol.setCellFactory(TextFieldTableCell.forTableColumn(new javafx.util.converter.IntegerStringConverter()));
+        duracionCol.setOnEditCommit(event -> {
+            Evento ev = event.getRowValue();
+            ev.setDuracionEstimadasDias(event.getNewValue());
+            tablaEventos.refresh(); // Para que se actualice la vista
+        });
+
+        // Estado editable desde combo (PLANIFICACION, CONFIRMADO, etc.)
+        estadoCol.setCellFactory(column -> new TableCell<>() {
+            private final ComboBox<EstadoEvento> combo = new ComboBox<>();
+
+            {
+                combo.getItems().setAll(EstadoEvento.values());
+                combo.setOnAction(e -> {
+                    Evento evento = getTableView().getItems().get(getIndex());
+                    evento.cambiarEstado(combo.getValue());
+                    commitEdit(combo.getValue().toString());
+                    tablaEventos.refresh();
+                });
+            }
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    combo.setValue(EstadoEvento.valueOf(item));
+                    setGraphic(combo);
+                }
+            }
+        });
     }
 
     private void mostrarAlerta(String mensaje) {
@@ -149,45 +240,33 @@ public class MainViewController {
     }
 
     private void cargarDatosEjemplo() {
-        // Crear personas ejemplo
         Persona p1 = new Persona("Claudio Biale", "01234567", "3758-123-456", "cb@email.com");
         Persona p2 = new Persona("Melissa Kolb", "76543210", "3758-123-456", "mk@email.com");
         Persona p3 = new Persona("John Doe", "11223344", "3758-123-456", "jd@email.com");
         personas.addAll(p1, p2, p3);
 
-        // Participantes ejemplo
         Participante part1 = new Participante("Carlos Ruiz", "01010101", "3758-123-456", "cr@email.com");
         Participante part2 = new Participante("Lucía Torres", "10101010", "3758-123-456", "lt@email.com");
         participantes.addAll(part1, part2);
 
-        // Crear eventos ejemplo
         Evento feria = new Feria("Feria del Libro", LocalDate.now().plusDays(2), 3, 20, true);
         Evento taller = new Taller("Taller de Pintura", LocalDate.now().plusDays(5), 2, 15, p1, Modalidad.PRESENCIAL);
         Evento concierto = new Concierto("Concierto Rock", LocalDate.now().plusDays(10), 1, TipoEntrada.PAGA);
         Evento expo = new Exposicion("Expo Arte", LocalDate.now().plusDays(7), 4, "Pintura", p2);
         Evento cicloCine = new CicloCine("Ciclo de Cine Clásico", LocalDate.now().plusDays(15), 5, true);
 
-        // Asignar responsables y roles
         feria.agregarResponsable(p1, "Organizador");
         taller.agregarResponsable(p2, "Instructor");
         concierto.agregarResponsable(p3, "Productor");
         expo.agregarResponsable(p2, "Curador");
         cicloCine.agregarResponsable(p1, "Coordinador");
 
-        // Cambiar estados para permitir inscripciones
         feria.cambiarEstado(EstadoEvento.CONFIRMADO);
         taller.cambiarEstado(EstadoEvento.CONFIRMADO);
         cicloCine.cambiarEstado(EstadoEvento.CONFIRMADO);
 
-        // Inscribir participantes si se requiere
-        if (feria.requiereInscripcion()) {
-            try { feria.inscribirParticipante(part1); } catch (Exception ignored) {}
-        }
-        if (taller.requiereInscripcion()) {
-            try { taller.inscribirParticipante(part2); } catch (Exception ignored) {}
-        }
-        if (cicloCine.requiereInscripcion()) {
-        }
+        try { feria.inscribirParticipante(part1); } catch (Exception ignored) {}
+        try { taller.inscribirParticipante(part2); } catch (Exception ignored) {}
 
         eventos.addAll(feria, taller, concierto, expo, cicloCine);
     }
@@ -211,9 +290,7 @@ public class MainViewController {
         for (Evento e : eventos) {
             for (Participante registrado : e.getParticipantes()) {
                 if (registrado.getDni().equals(p.getDni())) {
-                    if (!eventosAsociados.isEmpty()) {
-                        eventosAsociados.append(", ");
-                    }
+                    if (!eventosAsociados.isEmpty()) eventosAsociados.append(", ");
                     eventosAsociados.append(e.getNombre());
                 }
             }
@@ -221,12 +298,7 @@ public class MainViewController {
         return eventosAsociados.toString();
     }
 
-    // --- Acciones botones y menús ---
-
-    @FXML
-    public void salir() {
-        System.exit(0);
-    }
+    @FXML public void salir() { System.exit(0); }
 
     @FXML
     public void nuevoEvento() {
@@ -242,7 +314,7 @@ public class MainViewController {
             dialog.initOwner(btnNuevoEvento.getScene().getWindow());
 
             dialog.showAndWait().ifPresent(response -> {
-                if (response.getButtonData() == ButtonBar.ButtonData.OK_DONE) {
+                if (response.getButtonData().isDefaultButton()) {
                     Evento nuevoEvento = controller.getEvento();
                     if (nuevoEvento != null) {
                         eventos.add(nuevoEvento);
@@ -324,22 +396,22 @@ public class MainViewController {
             personas.remove(seleccionada);
         }
     }
+
     @FXML
     public void registrarParticipante() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/ParticipacionView.fxml"));
             DialogPane dialogPane = loader.load();
-
             ParticipacionController controller = loader.getController();
             controller.cargarDatosIniciales(personas, eventos);
             controller.setParticipantesGlobales(participantes);
+            controller.setPersonas(personas);
 
             controller.setOnParticipacionAgregada(() -> {
                 actualizarListaParticipantesDesdeEventos();
                 tablaParticipantes.refresh();
                 tablaEventos.refresh();
             });
-controller.setPersonas(personas);
 
             Dialog<ButtonType> dialog = new Dialog<>();
             dialog.setDialogPane(dialogPane);
@@ -348,31 +420,28 @@ controller.setPersonas(personas);
 
             dialog.showAndWait().ifPresent(response -> {
                 if (response.getButtonData().isDefaultButton()) {
-                    // Aquí también actualizar la lista y refrescar
                     actualizarListaParticipantesDesdeEventos();
                     tablaParticipantes.setItems(participantes);
                     tablaParticipantes.refresh();
                     tablaEventos.refresh();
                 }
             });
-
         } catch (IOException e) {
             e.printStackTrace();
             mostrarAlerta("Error al abrir el diálogo de registro de participación: " + e.getMessage());
         }
     }
 
-@FXML
-public void eliminarParticipante() {
-    Participante seleccionado = tablaParticipantes.getSelectionModel().getSelectedItem();
-    if (seleccionado != null) {
-        // Remover participante de los eventos a los que está inscripto
-        for (Evento e : eventos) {
-            e.getParticipantes().remove(seleccionado);
+    @FXML
+    public void eliminarParticipante() {
+        Participante seleccionado = tablaParticipantes.getSelectionModel().getSelectedItem();
+        if (seleccionado != null) {
+            for (Evento e : eventos) {
+                e.getParticipantes().remove(seleccionado);
+            }
+            actualizarListaParticipantesDesdeEventos();
+            tablaParticipantes.refresh();
+            tablaEventos.refresh();
         }
-        actualizarListaParticipantesDesdeEventos();
-        tablaParticipantes.refresh();
-        tablaEventos.refresh();
     }
-}
 }
