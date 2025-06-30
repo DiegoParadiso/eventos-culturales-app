@@ -88,6 +88,15 @@ public abstract class Evento {
         return false;
     }
 
+    /**
+     * Elimina un participante del evento.
+     * @param p Participante a eliminar.
+     * @return true si fue eliminado, false si no estaba en la lista.
+     */
+    public boolean eliminarParticipante(Participante p) {
+        return participantes.remove(p);
+    }
+
     public void cambiarEstado(EstadoEvento nuevoEstado) {
         this.estado = nuevoEstado;
     }
@@ -101,6 +110,7 @@ public abstract class Evento {
     public ObservableList<Participante> getParticipantes() {
         return participantes;
     }
+
     @Override
     public String toString() {
         return nombre + " (" + fechaInicio + ", " + estado + ")";

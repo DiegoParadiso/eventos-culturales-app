@@ -33,7 +33,7 @@
             <!-- Opción para Artista (solo se muestra si es concierto) -->
             <HBox spacing="10" alignment="CENTER_LEFT" fx:id="hboxArtista" visible="false" managed="false">
                 <Label text="Artista/Banda:"/>
-                <ComboBox fx:id="comboArtista" prefWidth="400"/>
+                <TextField fx:id="inputArtista" prefWidth="400" promptText="Nombre del artista o banda"/>
             </HBox>
 
             <!-- Botones agregar / eliminar -->
