@@ -31,7 +31,7 @@ public class Feria extends Evento {
 
     @Override
     public boolean validarCupo() {
-        return getParticipantes().size() < cantidadStands;
+        return true;
     }
 
     @Override

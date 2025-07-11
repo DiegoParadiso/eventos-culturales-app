@@ -3,9 +3,8 @@ package app.controller;
 import app.model.Artista;
 import app.model.Concierto;
 import app.model.Evento;
-import app.model.Participacion;
-import app.model.Participante;
 import app.model.Persona;
+import app.model.Participacion;
 import app.model.enums.RolEnEvento;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -33,12 +32,12 @@ public class ParticipacionController {
     @FXML private HBox hboxArtista;
 
     private ObservableList<Participacion> participaciones = FXCollections.observableArrayList();
-    private ObservableList<Participante> participantesGlobales;
+    private ObservableList<Persona> personasGlobales;
 
     private Runnable onParticipacionAgregada;
 
-    public void setParticipantesGlobales(ObservableList<Participante> lista) {
-        this.participantesGlobales = lista;
+    public void setPersonasGlobales(ObservableList<Persona> lista) {
+        this.personasGlobales = lista;
     }
 
     @FXML
@@ -58,8 +57,8 @@ public class ParticipacionController {
             }
         });
 
-        colPersona.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
-                data.getValue().getPersona().getNombreCompleto()));
+        colPersona.setCellValueFactory(data -> 
+            new javafx.beans.property.SimpleStringProperty(data.getValue().getPersona().getNombreCompleto()));
 
         colRol.setCellValueFactory(data -> {
             RolEnEvento rol = data.getValue().getRol();
@@ -67,8 +66,8 @@ public class ParticipacionController {
             return new javafx.beans.property.SimpleStringProperty(texto);
         });
 
-        colEvento.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
-                data.getValue().getEvento().getNombre()));
+        colEvento.setCellValueFactory(data -> 
+            new javafx.beans.property.SimpleStringProperty(data.getValue().getEvento().getNombre()));
 
         tablaParticipaciones.setItems(participaciones);
     }
@@ -98,7 +97,6 @@ public class ParticipacionController {
                 return;
             }
 
-            // Crear artista y agregarlo al concierto si no existe
             Artista artista = new Artista(nombreArtista.trim());
             Concierto concierto = (Concierto) evento;
 
@@ -109,39 +107,34 @@ public class ParticipacionController {
 
             concierto.agregarArtista(artista);
 
-            // Crear un Participante artificial con DNI "ARTISTA" y agregarlo a la lista global
-            Participante artistaParticipante = new Participante(nombreArtista.trim(), "ARTISTA", "", "");
-            if (participantesGlobales != null && !participantesGlobales.contains(artistaParticipante)) {
-                participantesGlobales.add(artistaParticipante);
+            // Crear una Persona artificial para el artista, con DNI "ARTISTA"
+            Persona artistaPersona = new Persona(nombreArtista.trim(), "ARTISTA", "", "");
+            if (personasGlobales != null && !personasGlobales.contains(artistaPersona)) {
+                personasGlobales.add(artistaPersona);
             }
 
-            // Crear la Participacion y agregarla a la lista observable
-            Participacion nueva = new Participacion(artistaParticipante, evento, RolEnEvento.SIN_ROL);
+            Participacion nueva = new Participacion(artistaPersona, evento, RolEnEvento.SIN_ROL);
             participaciones.add(nueva);
-
-            // Forzar refresco de la tabla para que actualice la vista
             tablaParticipaciones.refresh();
 
         } else {
-            // Para eventos normales
             Persona persona = comboPersona.getValue();
             RolEnEvento rol = comboRol.getValue();
 
-            if (persona == null || rol == null) {
+            if (persona == null || rol == null) {  
                 mostrarAlerta("Error", "Debe seleccionar una persona y un rol.");
                 return;
             }
 
-            Participante participante = obtenerOReutilizarParticipante(persona);
-
             try {
-                evento.inscribirParticipante(participante);
+                // Inscribimos la persona en el evento
+                evento.inscribirParticipante(persona);
             } catch (Exception e) {
-                mostrarAlerta("Error", "No se pudo inscribir al participante: " + e.getMessage());
+                mostrarAlerta("Error", "No se pudo inscribir a la persona: " + e.getMessage());
                 return;
             }
 
-            Participacion nueva = new Participacion(participante, evento, rol);
+            Participacion nueva = new Participacion(persona, evento, rol);
             participaciones.add(nueva);
         }
 
@@ -155,26 +148,22 @@ public class ParticipacionController {
         if (seleccionada == null) return;
 
         Evento evento = seleccionada.getEvento();
-        Persona participante = seleccionada.getPersona();
+        Persona persona = seleccionada.getPersona();
 
-        if (evento instanceof Concierto && participante.getDni().equals("ARTISTA")) {
+        if (evento instanceof Concierto && persona.getDni().equals("ARTISTA")) {
             Concierto concierto = (Concierto) evento;
-
             Artista artistaAEliminar = null;
             for (Artista a : concierto.getArtistas()) {
-                if (a.getNombre().equals(participante.getNombreCompleto())) {
+                if (a.getNombre().equals(persona.getNombreCompleto())) {
                     artistaAEliminar = a;
                     break;
                 }
             }
-
             if (artistaAEliminar != null) {
                 concierto.getArtistas().remove(artistaAEliminar);
             }
         } else {
-            if (participante instanceof Participante) {
-                evento.getParticipantes().remove((Participante) participante);
-            }
+            evento.getParticipantes().remove(persona);
         }
 
         participaciones.remove(seleccionada);
@@ -196,28 +185,6 @@ public class ParticipacionController {
         comboRol.setValue(null);
         comboEvento.setValue(null);
         inputArtista.clear();
-    }
-
-    private Participante obtenerOReutilizarParticipante(Persona persona) {
-        if (participantesGlobales != null) {
-            for (Participante p : participantesGlobales) {
-                if (p.getDni().equals(persona.getDni())) {
-                    return p;
-                }
-            }
-        }
-
-        Participante nuevo = new Participante(
-                persona.getNombreCompleto(),
-                persona.getDni(),
-                persona.getTelefono(),
-                persona.getCorreo()
-        );
-
-        if (participantesGlobales != null) {
-            participantesGlobales.add(nuevo);
-        }
-        return nuevo;
     }
 
     private void mostrarAlerta(String titulo, String mensaje) {

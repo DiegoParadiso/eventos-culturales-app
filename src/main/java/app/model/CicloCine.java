@@ -8,11 +8,13 @@ import java.util.*;
 public class CicloCine extends Evento {
 
     @ElementCollection
-    @MapKeyColumn(name = "orden")
-    @Column(name = "pelicula")
-    private Map<Integer, Pelicula> peliculasOrdenadas = new LinkedHashMap<>();
+    @OrderColumn(name = "orden")
+    private List<Pelicula> peliculasOrdenadas = new ArrayList<>();
 
     private boolean conCharlasPosteriores;
+
+    @Transient
+    private Set<Persona> participantes = new HashSet<>();
 
     public CicloCine() {}
 
@@ -26,12 +28,13 @@ public class CicloCine extends Evento {
         return true;
     }
 
-    public void agregarPelicula(int orden, Pelicula pelicula) {
-        peliculasOrdenadas.put(orden, pelicula);
+    public void agregarPelicula(Pelicula pelicula) {
+        peliculasOrdenadas.add(pelicula);
     }
 
-    public Map<Integer, Pelicula> getPeliculasOrdenadas() {
-        return Collections.unmodifiableMap(peliculasOrdenadas);
+    // Devuelve la lista inmutable para proteger la colección interna
+    public List<Pelicula> getPeliculasOrdenadas() {
+        return Collections.unmodifiableList(peliculasOrdenadas);
     }
 
     public boolean isConCharlasPosteriores() {

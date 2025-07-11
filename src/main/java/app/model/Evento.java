@@ -25,7 +25,7 @@ public abstract class Evento {
     private Set<Persona> responsables = new HashSet<>();
 
     @ManyToMany
-    private Set<Participante> participantes = new HashSet<>();
+    private Set<Persona> participantes = new HashSet<>();
 
     public Evento() {
         this.estado = EstadoEvento.PLANIFICACION;
@@ -38,6 +38,10 @@ public abstract class Evento {
         this.duracionEstimadasDias = duracionEstimadasDias;
     }
 
+    public boolean inscribirParticipante(Persona p) {
+    return participantes.add(p);
+}
+
     public void agregarResponsable(Persona persona) {
         responsables.add(persona);
     }
@@ -45,6 +49,10 @@ public abstract class Evento {
     public void agregarResponsable(Persona persona, String rol) {
         responsables.add(persona);
         persona.asignarRol(this, rol);
+    }
+
+    public Set<Persona> getParticipantes() {
+        return Collections.unmodifiableSet(participantes);
     }
 
     public Set<Persona> getResponsablesConRol(String rol) {
@@ -69,47 +77,27 @@ public abstract class Evento {
         return true;
     }
 
-    public boolean inscribirParticipante(Participante p) {
-        if (estado != EstadoEvento.CONFIRMADO && estado != EstadoEvento.EN_EJECUCION) {
-            throw new IllegalStateException("El evento no acepta inscripciones en su estado actual.");
-        }
-        if (!requiereInscripcion()) {
-            throw new IllegalStateException("El evento no requiere inscripción previa.");
-        }
-        if (!validarCupo()) {
-            throw new IllegalStateException("Cupo máximo alcanzado.");
-        }
-        if (!participantes.contains(p)) {
-            return participantes.add(p);
-        }
-        return false;
-    }
-
-    public boolean eliminarParticipante(Participante p) {
-        return participantes.remove(p);
-    }
-
     public void cambiarEstado(EstadoEvento nuevoEstado) {
         this.estado = nuevoEstado;
     }
 
     // Getters y Setters
+    public Long getId() { return id; }
+
     public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
+
     public LocalDate getFechaInicio() { return fechaInicio; }
+    public void setFechaInicio(LocalDate fechaInicio) { this.fechaInicio = fechaInicio; }
+
     public int getDuracionEstimadasDias() { return duracionEstimadasDias; }
+    public void setDuracionEstimadasDias(int duracionEstimadasDias) { this.duracionEstimadasDias = duracionEstimadasDias; }
+
     public EstadoEvento getEstado() { return estado; }
 
     public Set<Persona> getResponsables() {
         return Collections.unmodifiableSet(responsables);
     }
-
-    public Set<Participante> getParticipantes() {
-        return Collections.unmodifiableSet(participantes);
-    }
-
-    public void setNombre(String nombre) { this.nombre = nombre; }
-    public void setFechaInicio(LocalDate fechaInicio) { this.fechaInicio = fechaInicio; }
-    public void setDuracionEstimadasDias(int dias) { this.duracionEstimadasDias = dias; }
 
     @Override
     public String toString() {
