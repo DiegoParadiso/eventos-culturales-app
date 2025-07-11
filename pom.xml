@@ -13,19 +13,34 @@
         <maven.compiler.target>21</maven.compiler.target>
         <javafx.version>21.0.2</javafx.version>
         <exec.mainClass>app.AppFX</exec.mainClass>
+        <javafx.platform>win</javafx.platform>
     </properties>
 
     <dependencies>
-        <!-- JavaFX modules -->
+        <!-- JavaFX modules con classifier correcto -->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>${javafx.version}</version>
+            <classifier>${javafx.platform}</classifier>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>${javafx.version}</version>
+            <classifier>${javafx.platform}</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-base</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>${javafx.platform}</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+            <classifier>${javafx.platform}</classifier>
         </dependency>
     </dependencies>
 
@@ -42,7 +57,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Plugin para ejecutar con JavaFX -->
+            <!-- Plugin para ejecutar JavaFX -->
             <plugin>
                 <groupId>org.openjfx</groupId>
                 <artifactId>javafx-maven-plugin</artifactId>

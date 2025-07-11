@@ -61,8 +61,6 @@ public class MainViewController {
     @FXML private DatePicker selectorFecha;
     @FXML private TableView<Evento> tablaEventosDia;
     @FXML private TableColumn<Evento, String> eventoDiaCol;
-    @FXML private TableColumn<Evento, String> horarioDiaCol;
-    @FXML private TableColumn<Evento, String> lugarDiaCol;
 
     // --- Botones ---
     @FXML private Button btnNuevoEvento;
@@ -154,8 +152,6 @@ public class MainViewController {
 
         // --- Calendario ---
         eventoDiaCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNombre()));
-        horarioDiaCol.setCellValueFactory(data -> new SimpleStringProperty(""));
-        lugarDiaCol.setCellValueFactory(data -> new SimpleStringProperty(""));
 
         selectorFecha.valueProperty().addListener((obs, old, nuevaFecha) -> filtrarEventosPorFecha(nuevaFecha));
 
