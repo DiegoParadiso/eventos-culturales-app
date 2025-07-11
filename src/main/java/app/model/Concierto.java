@@ -1,24 +1,32 @@
 package app.model;
 
 import app.model.enums.TipoEntrada;
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+@Entity
 public class Concierto extends Evento {
-    private Set<Artista> artistas;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    private Set<Artista> artistas = new HashSet<>();
+
+    @Enumerated(EnumType.STRING)
     private TipoEntrada tipoEntrada;
+
+    public Concierto() {}
 
     public Concierto(String nombre, LocalDate fechaInicio, int duracionEstimadasDias, TipoEntrada tipoEntrada) {
         super(nombre, fechaInicio, duracionEstimadasDias);
-        this.artistas = new HashSet<>();
         this.tipoEntrada = tipoEntrada;
     }
 
     @Override
     public boolean requiereInscripcion() {
-        return tipoEntrada == TipoEntrada.PAGA; // Ejemplo: solo paga requiere inscripción
+        return tipoEntrada == TipoEntrada.PAGA;
     }
 
     public void agregarArtista(Artista artista) {
@@ -29,7 +37,9 @@ public class Concierto extends Evento {
         return Collections.unmodifiableSet(artistas);
     }
 
-    public TipoEntrada getTipoEntrada() { return tipoEntrada; }
+    public TipoEntrada getTipoEntrada() {
+        return tipoEntrada;
+    }
 
     @Override
     public String toString() {

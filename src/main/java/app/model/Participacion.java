@@ -1,12 +1,25 @@
 package app.model;
 
 import app.model.enums.RolEnEvento;
+import jakarta.persistence.*;
 
+@Entity
 public class Participacion {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne
     private Persona persona;
+
+    @ManyToOne
     private Evento evento;
+
+    @Enumerated(EnumType.STRING)
     private RolEnEvento rol;
+
+    public Participacion() {}
 
     public Participacion(Persona persona, Evento evento, RolEnEvento rol) {
         this.persona = persona;

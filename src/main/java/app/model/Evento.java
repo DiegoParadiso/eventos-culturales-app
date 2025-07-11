@@ -1,30 +1,41 @@
 package app.model;
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import app.model.enums.EstadoEvento;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import jakarta.persistence.*;
 
+import java.time.LocalDate;
+import java.util.*;
+
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Evento {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String nombre;
     private LocalDate fechaInicio;
     private int duracionEstimadasDias;
-    private Set<Persona> responsables;
+
+    @Enumerated(EnumType.STRING)
     private EstadoEvento estado;
-    private ObservableList<Participante> participantes;
-    
+
+    @ManyToMany
+    private Set<Persona> responsables = new HashSet<>();
+
+    @ManyToMany
+    private Set<Participante> participantes = new HashSet<>();
+
+    public Evento() {
+        this.estado = EstadoEvento.PLANIFICACION;
+    }
 
     public Evento(String nombre, LocalDate fechaInicio, int duracionEstimadasDias) {
+        this();
         this.nombre = nombre;
         this.fechaInicio = fechaInicio;
         this.duracionEstimadasDias = duracionEstimadasDias;
-        this.responsables = new HashSet<>();
-        this.participantes = FXCollections.observableArrayList();
-        this.estado = EstadoEvento.PLANIFICACION;
     }
 
     public void agregarResponsable(Persona persona) {
@@ -50,29 +61,14 @@ public abstract class Evento {
         return responsables.contains(persona) && persona.obtenerRoles(this).contains(rol);
     }
 
-    /**
-     * Indica si el evento requiere inscripción previa.
-     * Por defecto NO requiere inscripción.
-     * Subclases que sí requieran inscripción deben sobrescribirlo.
-     */
     public boolean requiereInscripcion() {
-        return false; // Por defecto, no requiere inscripción
+        return false;
     }
 
-    /**
-     * Valida si el evento tiene cupo disponible para inscribir a otro participante.
-     * Por defecto no hay cupo limitado.
-     * Subclases con cupo máximo deben sobrescribirlo.
-     */
     public boolean validarCupo() {
-        return true; // Por defecto no hay límite de cupo
+        return true;
     }
 
-    /**
-     * Inscribe un participante si se cumplen las condiciones de estado,
-     * inscripción previa y cupo.
-     * @throws IllegalStateException si no se puede inscribir.
-     */
     public boolean inscribirParticipante(Participante p) {
         if (estado != EstadoEvento.CONFIRMADO && estado != EstadoEvento.EN_EJECUCION) {
             throw new IllegalStateException("El evento no acepta inscripciones en su estado actual.");
@@ -89,11 +85,6 @@ public abstract class Evento {
         return false;
     }
 
-    /**
-     * Elimina un participante del evento.
-     * @param p Participante a eliminar.
-     * @return true si fue eliminado, false si no estaba en la lista.
-     */
     public boolean eliminarParticipante(Participante p) {
         return participantes.remove(p);
     }
@@ -107,13 +98,18 @@ public abstract class Evento {
     public LocalDate getFechaInicio() { return fechaInicio; }
     public int getDuracionEstimadasDias() { return duracionEstimadasDias; }
     public EstadoEvento getEstado() { return estado; }
-    public Set<Persona> getResponsables() { return Collections.unmodifiableSet(responsables); }
-    public ObservableList<Participante> getParticipantes() {
-        return participantes;
+
+    public Set<Persona> getResponsables() {
+        return Collections.unmodifiableSet(responsables);
     }
-public void setNombre(String nombre) { this.nombre = nombre; }
-public void setFechaInicio(LocalDate fechaInicio) { this.fechaInicio = fechaInicio; }
-public void setDuracionEstimadasDias(int dias) { this.duracionEstimadasDias = dias; }
+
+    public Set<Participante> getParticipantes() {
+        return Collections.unmodifiableSet(participantes);
+    }
+
+    public void setNombre(String nombre) { this.nombre = nombre; }
+    public void setFechaInicio(LocalDate fechaInicio) { this.fechaInicio = fechaInicio; }
+    public void setDuracionEstimadasDias(int dias) { this.duracionEstimadasDias = dias; }
 
     @Override
     public String toString() {

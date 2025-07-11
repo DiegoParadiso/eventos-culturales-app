@@ -21,7 +21,7 @@ public class ParticipacionController {
 
     @FXML private ComboBox<Persona> comboPersona;
     @FXML private ComboBox<RolEnEvento> comboRol;
-    @FXML private TextField inputArtista; // Usamos TextField en lugar de ComboBox
+    @FXML private TextField inputArtista; 
     @FXML private ComboBox<Evento> comboEvento;
 
     @FXML private TableView<Participacion> tablaParticipaciones;

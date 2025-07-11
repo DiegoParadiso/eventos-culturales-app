@@ -1,9 +1,15 @@
 package app.model;
 
-public final class Pelicula {
-    private final String titulo;
-    private final int orden;
-    private final boolean tieneCharla;
+import jakarta.persistence.Embeddable;
+
+@Embeddable
+public class Pelicula {
+
+    private String titulo;
+    private int orden;
+    private boolean tieneCharla;
+
+    public Pelicula() {}
 
     public Pelicula(String titulo, int orden, boolean tieneCharla) {
         this.titulo = titulo;

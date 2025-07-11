@@ -1,9 +1,19 @@
 package app.model;
 
+import jakarta.persistence.*;
+
 import java.util.Objects;
 
+@Entity
 public class Artista {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String nombre;
+
+    public Artista() {}
 
     public Artista(String nombre) {
         this.nombre = nombre;

@@ -1,19 +1,24 @@
 package app.model;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import jakarta.persistence.*;
+import java.util.*;
 
+@Entity
 public class Persona {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     private String nombreCompleto;
     private String dni;
     private String telefono;
     private String correo;
 
+    @Transient
     private final Map<Evento, Set<String>> rolesPorEvento = new HashMap<>();
+
+    public Persona() {}
 
     public Persona(String nombreCompleto, String dni, String telefono, String correo) {
         this.nombreCompleto = nombreCompleto;
@@ -30,7 +35,8 @@ public class Persona {
         return rolesPorEvento.getOrDefault(evento, Collections.emptySet());
     }
 
-    // Getters
+    // Getters y setters
+
     public String getNombreCompleto() {
         return nombreCompleto;
     }
@@ -47,7 +53,6 @@ public class Persona {
         return correo;
     }
 
-    // Setters para edición
     public void setNombreCompleto(String nombreCompleto) {
         this.nombreCompleto = nombreCompleto;
     }

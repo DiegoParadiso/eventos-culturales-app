@@ -21,16 +21,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.DialogPane;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 
 public class MainViewController {
@@ -72,31 +63,34 @@ public class MainViewController {
     @FXML private Button btnEliminarParticipante;
 
     // --- Datos ---
+    // Para mantener la simplicidad: usamos ObservableList solo en el controlador, para vincular con JavaFX,
+    // pero internamente los modelos usan colecciones normales (Set, List).
     private final ObservableList<Evento> eventos = FXCollections.observableArrayList();
     private final ObservableList<Persona> personas = FXCollections.observableArrayList();
     private final ObservableList<Participante> participantes = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
-        // --- Eventos ---
+        // --- Configurar columnas de tablaEventos ---
         nombreCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getNombre()));
         fechaCol.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getFechaInicio()));
         duracionCol.setCellValueFactory(data -> new SimpleObjectProperty<>(data.getValue().getDuracionEstimadasDias()));
         tipoCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getClass().getSimpleName()));
         estadoCol.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getEstado().toString()));
-        tablaEventos.setItems(eventos);
 
+        // Cupo: si es Taller o Feria, calculamos cupo disponible con métodos normales
         cupoCol.setCellValueFactory(data -> {
             Evento evento = data.getValue();
             if (evento instanceof Taller taller) {
-                return taller.cupoDisponibleProperty();
+                return new SimpleIntegerProperty(taller.getCupoMaximo() - taller.getParticipantes().size());
             } else if (evento instanceof Feria feria) {
                 int cupo = feria.getCantidadStands() - feria.getParticipantes().size();
                 return new SimpleIntegerProperty(cupo);
             } else {
-                return new SimpleIntegerProperty(-1);
+                return new SimpleIntegerProperty(-1); // Sin límite
             }
         });
+
         cupoCol.setCellFactory(col -> new TableCell<>() {
             @Override
             protected void updateItem(Number item, boolean empty) {
@@ -111,7 +105,9 @@ public class MainViewController {
             }
         });
 
-        // --- Personas (editable) ---
+        tablaEventos.setItems(eventos);
+
+        // --- Personas ---
         tablaPersonas.setItems(personas);
         tablaPersonas.setEditable(true);
 
@@ -155,28 +151,28 @@ public class MainViewController {
 
         selectorFecha.valueProperty().addListener((obs, old, nuevaFecha) -> filtrarEventosPorFecha(nuevaFecha));
 
-        // --- Cargar datos iniciales ---
+        // --- Cargar datos de ejemplo ---
         cargarDatosEjemplo();
-        
-        // --- Tabla Eventos editable ---
+
+        // --- Editable eventos ---
         tablaEventos.setEditable(true);
 
-        // Nombre editable
         nombreCol.setCellFactory(TextFieldTableCell.forTableColumn());
         nombreCol.setOnEditCommit(event -> {
             Evento ev = event.getRowValue();
             ev.setNombre(event.getNewValue());
         });
 
-        // Fecha editable
         fechaCol.setCellFactory(column -> new TableCell<>() {
             private final DatePicker datePicker = new DatePicker();
 
             {
                 datePicker.setOnAction(e -> {
                     Evento evento = getTableView().getItems().get(getIndex());
-                    evento.setFechaInicio(datePicker.getValue());
-                    commitEdit(datePicker.getValue());
+                    if (evento != null) {
+                        evento.setFechaInicio(datePicker.getValue());
+                        commitEdit(datePicker.getValue());
+                    }
                 });
             }
 
@@ -192,15 +188,13 @@ public class MainViewController {
             }
         });
 
-        // Duración editable
         duracionCol.setCellFactory(TextFieldTableCell.forTableColumn(new javafx.util.converter.IntegerStringConverter()));
         duracionCol.setOnEditCommit(event -> {
             Evento ev = event.getRowValue();
             ev.setDuracionEstimadasDias(event.getNewValue());
-            tablaEventos.refresh(); // Para que se actualice la vista
+            tablaEventos.refresh();
         });
 
-        // Estado editable desde combo (PLANIFICACION, CONFIRMADO, etc.)
         estadoCol.setCellFactory(column -> new TableCell<>() {
             private final ComboBox<EstadoEvento> combo = new ComboBox<>();
 
@@ -208,9 +202,11 @@ public class MainViewController {
                 combo.getItems().setAll(EstadoEvento.values());
                 combo.setOnAction(e -> {
                     Evento evento = getTableView().getItems().get(getIndex());
-                    evento.cambiarEstado(combo.getValue());
-                    commitEdit(combo.getValue().toString());
-                    tablaEventos.refresh();
+                    if (evento != null) {
+                        evento.cambiarEstado(combo.getValue());
+                        commitEdit(combo.getValue().toString());
+                        tablaEventos.refresh();
+                    }
                 });
             }
 
@@ -265,6 +261,8 @@ public class MainViewController {
         try { taller.inscribirParticipante(part2); } catch (Exception ignored) {}
 
         eventos.addAll(feria, taller, concierto, expo, cicloCine);
+
+        actualizarListaParticipantesDesdeEventos();
     }
 
     private void filtrarEventosPorFecha(LocalDate fecha) {
@@ -286,7 +284,7 @@ public class MainViewController {
         for (Evento e : eventos) {
             for (Participante registrado : e.getParticipantes()) {
                 if (registrado.getDni().equals(p.getDni())) {
-                    if (!eventosAsociados.isEmpty()) eventosAsociados.append(", ");
+                    if (eventosAsociados.length() > 0) eventosAsociados.append(", ");
                     eventosAsociados.append(e.getNombre());
                 }
             }
@@ -342,6 +340,7 @@ public class MainViewController {
         Evento seleccionado = tablaEventos.getSelectionModel().getSelectedItem();
         if (seleccionado != null) {
             eventos.remove(seleccionado);
+            actualizarListaParticipantesDesdeEventos();
         }
     }
 
@@ -374,22 +373,12 @@ public class MainViewController {
         }
     }
 
-    private void actualizarListaParticipantesDesdeEventos() {
-        participantes.clear();
-        for (Evento e : eventos) {
-            for (Participante p : e.getParticipantes()) {
-                if (!participantes.contains(p)) {
-                    participantes.add(p);
-                }
-            }
-        }
-    }
-
     @FXML
     public void eliminarPersona() {
         Persona seleccionada = tablaPersonas.getSelectionModel().getSelectedItem();
         if (seleccionada != null) {
             personas.remove(seleccionada);
+            // Opcional: también remover personas de responsables en eventos si querés
         }
     }
 
@@ -438,6 +427,17 @@ public class MainViewController {
             actualizarListaParticipantesDesdeEventos();
             tablaParticipantes.refresh();
             tablaEventos.refresh();
+        }
+    }
+
+    private void actualizarListaParticipantesDesdeEventos() {
+        participantes.clear();
+        for (Evento e : eventos) {
+            for (Participante p : e.getParticipantes()) {
+                if (!participantes.contains(p)) {
+                    participantes.add(p);
+                }
+            }
         }
     }
 }
